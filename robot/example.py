@@ -1,9 +1,8 @@
-from ctypes import c_int, cdll, c_bool, c_char_p, c_uint8
-from ctypes.util import find_library
 import platform
 import time
-
 from _ctypes import POINTER
+from ctypes import c_bool, c_char_p, c_int, c_uint8, cdll
+from ctypes.util import find_library
 
 # Подключаем внешнюю библиотеку для работы с SDK
 platform = platform.system()
@@ -45,39 +44,78 @@ device = {
 
 # массив дескрипторов сервоприводов и их стартовых позиций
 servos = [
-    {"descriptor": device["body"],
-     "start_position": body_start_pulse
-     },
-    {"descriptor": device["claw"],
-     "start_position": claw_start_pulse
-     },
-    {"descriptor": device["arrowR"],
-     "start_position": arrowR_start_pulse
-     },
-    {"descriptor": device["arrowL"],
-     "start_position": arrowL_start_pulse
-     },
-    {"descriptor": device["clawRotate"],
-     "start_position": claw_rotate_start_pulse
-     },
+    {"descriptor": device["body"], "start_position": body_start_pulse},
+    {"descriptor": device["claw"], "start_position": claw_start_pulse},
+    {"descriptor": device["arrowR"], "start_position": arrowR_start_pulse},
+    {"descriptor": device["arrowL"], "start_position": arrowL_start_pulse},
+    {"descriptor": device["clawRotate"], "start_position": claw_rotate_start_pulse},
 ]
 
 # Указываем типы аргументов для функций
 lib.RI_SDK_InitSDK.argtypes = [c_int, POINTER(c_char_p)]
-lib.RI_SDK_CreateModelComponent.argtypes = [c_char_p, c_char_p, c_char_p, POINTER(c_int), POINTER(c_char_p)]
+lib.RI_SDK_CreateModelComponent.argtypes = [
+    c_char_p,
+    c_char_p,
+    c_char_p,
+    POINTER(c_int),
+    POINTER(c_char_p),
+]
 lib.RI_SDK_LinkPWMToController.argtypes = [c_int, c_int, c_uint8, POINTER(c_char_p)]
-lib.RI_SDK_LinkLedToController.argtypes = [c_int, c_int, c_int, c_int, c_int, POINTER(c_char_p)]
-lib.RI_SDK_LinkServodriveToController.argtypes = [c_int, c_int, c_int, POINTER(c_char_p)]
-lib.RI_SDK_exec_RGB_LED_SinglePulse.argtypes = [c_int, c_int, c_int, c_int, c_int, c_bool, POINTER(c_char_p)]
+lib.RI_SDK_LinkLedToController.argtypes = [
+    c_int,
+    c_int,
+    c_int,
+    c_int,
+    c_int,
+    POINTER(c_char_p),
+]
+lib.RI_SDK_LinkServodriveToController.argtypes = [
+    c_int,
+    c_int,
+    c_int,
+    POINTER(c_char_p),
+]
+lib.RI_SDK_exec_RGB_LED_SinglePulse.argtypes = [
+    c_int,
+    c_int,
+    c_int,
+    c_int,
+    c_int,
+    c_bool,
+    POINTER(c_char_p),
+]
 lib.RI_SDK_exec_ServoDrive_TurnByPulse.argtypes = [c_int, c_int, POINTER(c_char_p)]
 lib.RI_SDK_DestroyComponent.argtypes = [c_int, POINTER(c_char_p)]
 lib.RI_SDK_exec_RGB_LED_Stop.argtypes = [c_int, POINTER(c_char_p)]
 lib.RI_SDK_sigmod_PWM_ResetAll.argtypes = [c_int, POINTER(c_char_p)]
 lib.RI_SDK_DestroySDK.argtypes = [c_bool, POINTER(c_char_p)]
-lib.RI_SDK_exec_RGB_LED_FlashingWithFrequency.argtypes = [c_int, c_int, c_int, c_int, c_int, c_int, c_bool,
-                                                          POINTER(c_char_p)]
-lib.RI_SDK_exec_RGB_LED_Flicker.argtypes = [c_int, c_int, c_int, c_int, c_int, c_int, c_bool, POINTER(c_char_p)]
-lib.RI_SDK_exec_ServoDrive_Turn.argtypes = [c_int, c_int, c_int, c_bool, POINTER(c_char_p)]
+lib.RI_SDK_exec_RGB_LED_FlashingWithFrequency.argtypes = [
+    c_int,
+    c_int,
+    c_int,
+    c_int,
+    c_int,
+    c_int,
+    c_bool,
+    POINTER(c_char_p),
+]
+lib.RI_SDK_exec_RGB_LED_Flicker.argtypes = [
+    c_int,
+    c_int,
+    c_int,
+    c_int,
+    c_int,
+    c_int,
+    c_bool,
+    POINTER(c_char_p),
+]
+lib.RI_SDK_exec_ServoDrive_Turn.argtypes = [
+    c_int,
+    c_int,
+    c_int,
+    c_bool,
+    POINTER(c_char_p),
+]
 
 
 # для получения текста ошибки
@@ -93,12 +131,19 @@ def initServos():
     # создаем 5 сервоприводов и линкуем их к пинам 0-4
     for i in range(len(servos)):
         # создаем компонент сервопривода с конкретной моделью как исполняемое устройство и получаем дескриптор сервопривода
-        errCode = lib.RI_SDK_CreateModelComponent("executor".encode(), "servodrive".encode(), "mg90s".encode(),
-                                                  servos[i]["descriptor"], errTextC)
+        errCode = lib.RI_SDK_CreateModelComponent(
+            "executor".encode(),
+            "servodrive".encode(),
+            "mg90s".encode(),
+            servos[i]["descriptor"],
+            errTextC,
+        )
         if errCode != 0:
             return errCode, errTextC
         # связываем сервопривод с ШИМ,передаем дескриптор сервопривода и ШИМ
-        errCode = lib.RI_SDK_LinkServodriveToController(servos[i]["descriptor"], device["pwm"], i, errTextC)
+        errCode = lib.RI_SDK_LinkServodriveToController(
+            servos[i]["descriptor"], device["pwm"], i, errTextC,
+        )
         if errCode != 0:
             return errCode, errTextC
     return errCode, errTextC
@@ -112,43 +157,63 @@ def initDevice():
     if errCode != 0:
         return errCode, errTextC
     # создаем компонент ШИМ с конкретной моделью как исполняемое устройство,получаем дескриптор сервопривода
-    errCode = lib.RI_SDK_CreateModelComponent("connector".encode(), "pwm".encode(), "pca9685".encode(), device["pwm"],
-                                              errTextC)
+    errCode = lib.RI_SDK_CreateModelComponent(
+        "connector".encode(),
+        "pwm".encode(),
+        "pca9685".encode(),
+        device["pwm"],
+        errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
 
     # создаем компонент i2c адатера
     # Здесь осуществлен примитивное определение подключенной модели адаптера
     # Сначала пробуем создать i2c адаптер модели ch341 и связать с ним ШИМ
-    errCode = lib.RI_SDK_CreateModelComponent("connector".encode(), "i2c_adapter".encode(), "ch341".encode(),
-                                              device["i2c"], errTextC)
+    errCode = lib.RI_SDK_CreateModelComponent(
+        "connector".encode(),
+        "i2c_adapter".encode(),
+        "ch341".encode(),
+        device["i2c"],
+        errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
 
     # связываем i2c адаптер с ШИМ по адресу 0x40
-    errCode = lib.RI_SDK_LinkPWMToController(device["pwm"], device["i2c"], c_uint8(0x40), errTextC)
+    errCode = lib.RI_SDK_LinkPWMToController(
+        device["pwm"], device["i2c"], c_uint8(0x40), errTextC,
+    )
     if errCode != 0:
 
         # Если не получается то пробуем создать i2c адаптер модели cp2112
-        errCode = lib.RI_SDK_CreateModelComponent("connector".encode(), "i2c_adapter".encode(), "cp2112".encode(),
-                                              device["i2c"], errTextC)
+        errCode = lib.RI_SDK_CreateModelComponent(
+            "connector".encode(),
+            "i2c_adapter".encode(),
+            "cp2112".encode(),
+            device["i2c"],
+            errTextC,
+        )
         if errCode != 0:
             return errCode, errTextC
         # связываем i2c адаптер с ШИМ по адресу 0x40
-        errCode = lib.RI_SDK_LinkPWMToController(device["pwm"], device["i2c"], c_uint8(0x40), errTextC)
+        errCode = lib.RI_SDK_LinkPWMToController(
+            device["pwm"], device["i2c"], c_uint8(0x40), errTextC,
+        )
 
         if errCode != 0:
             return errCode, errTextC
 
-
-
     # создаем компонент светодиода с конкретной моделью (ky016) как исполняемое устройство и получаем дескриптор светодиода
-    errCode = lib.RI_SDK_CreateModelComponent("executor".encode(), "led".encode(), "ky016".encode(), device["led"],
-                                              errTextC)
+    errCode = lib.RI_SDK_CreateModelComponent(
+        "executor".encode(), "led".encode(), "ky016".encode(), device["led"], errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
     # связываем светодиод с ШИМ,передаем значения трех пинов к которым подключен светодиод
-    errCode = lib.RI_SDK_LinkLedToController(device["led"], device["pwm"], 15, 14, 13, errTextC)
+    errCode = lib.RI_SDK_LinkLedToController(
+        device["led"], device["pwm"], 15, 14, 13, errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
     # инициализируем сервоприводы
@@ -163,7 +228,9 @@ def startPosition(servo):
     errTextC = c_char_p()  # Текст ошибки. C type: char*
     errCode = 0
     # выполняем поворот сервопривода в заданный угол,передаем дескриптор сервопривода,значение угла
-    errCode = lib.RI_SDK_exec_ServoDrive_TurnByPulse(servo["descriptor"], servo["start_position"], errTextC)
+    errCode = lib.RI_SDK_exec_ServoDrive_TurnByPulse(
+        servo["descriptor"], servo["start_position"], errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
 
@@ -176,7 +243,9 @@ def startPosition(servo):
 def startPositionAllServo():
     errTextC = c_char_p()  # Текст ошибки. C type: char*
     # выполняем одиночное свечение светодиодом,передаем дескриптор светодиода,3 параметра цвета(RGB), и включаем асинхронный режим работы
-    errCode = lib.RI_SDK_exec_RGB_LED_SinglePulse(device["led"], 255, 0, 0, 0, c_bool(True), errTextC)
+    errCode = lib.RI_SDK_exec_RGB_LED_SinglePulse(
+        device["led"], 255, 0, 0, 0, c_bool(True), errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
     # приводим сервоприводы в стартовое положение
@@ -185,7 +254,9 @@ def startPositionAllServo():
         if errCode != 0:
             return errCode, errTextC
     # выполняем одиночное свечение светодиодом,передаем дескриптор светодиода,3 параметра цвета(RGB), и включаем асинхронный режим работы
-    errCode = lib.RI_SDK_exec_RGB_LED_SinglePulse(device["led"], 0, 255, 0, 0, c_bool(True), errTextC)
+    errCode = lib.RI_SDK_exec_RGB_LED_SinglePulse(
+        device["led"], 0, 255, 0, 0, c_bool(True), errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
     # небольшая пауза для последовательного движения
@@ -210,7 +281,9 @@ def destructServos():
 def destruct():
     errTextC = c_char_p()  # Текст ошибки. C type: char*
     # выполняем одиночное свечение светодиодом,передаем дескриптор светодиода,3 параметра цвета(RGB), и включаем асинхронный режим работы
-    errCode = lib.RI_SDK_exec_RGB_LED_SinglePulse(device["led"], 255, 0, 0, 0, c_bool(True), errTextC)
+    errCode = lib.RI_SDK_exec_RGB_LED_SinglePulse(
+        device["led"], 255, 0, 0, 0, c_bool(True), errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
     # уничтожаем сервоприводы
@@ -244,23 +317,32 @@ def destruct():
 
     return errCode, errTextC
 
+
 # rotateBody - вращение тела в указанный угол
 def rotateBody(angle, speed):
     errTextC = c_char_p()  # Текст ошибки. C type: char*
     # выполняем мигание с заданной частотой,передаем дескриптор светодиода,3 параметра цвета(RGB),частоту,продолжительность и включаем асинхронный режим работы
-    errCode = lib.RI_SDK_exec_RGB_LED_FlashingWithFrequency(device["led"], 0, 255, 0, 5, 0, c_bool(True), errTextC)
+    errCode = lib.RI_SDK_exec_RGB_LED_FlashingWithFrequency(
+        device["led"], 0, 255, 0, 5, 0, c_bool(True), errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
     # выполняем поворот на заданный угол,передаем дескриптор тела,угол,скорость и асинхронный режим работы
-    errCode = lib.RI_SDK_exec_ServoDrive_Turn(device["body"], angle, speed, c_bool(False), errTextC)
+    errCode = lib.RI_SDK_exec_ServoDrive_Turn(
+        device["body"], angle, speed, c_bool(False), errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
     # выполняем поворот на заданный угол,передаем дескриптор клешни,угол,скорость и асинхронный режим работы
-    errCode = lib.RI_SDK_exec_ServoDrive_Turn(device["clawRotate"], 45, speed, c_bool(False), errTextC)
+    errCode = lib.RI_SDK_exec_ServoDrive_Turn(
+        device["clawRotate"], 45, speed, c_bool(False), errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
     # выполняем поворот на заданный угол,передаем дескриптор клешни,угол,скорость и асинхронный режим работы
-    errCode = lib.RI_SDK_exec_ServoDrive_Turn(device["clawRotate"], -45, speed, c_bool(False), errTextC)
+    errCode = lib.RI_SDK_exec_ServoDrive_Turn(
+        device["clawRotate"], -45, speed, c_bool(False), errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
 
@@ -271,46 +353,65 @@ def rotateBody(angle, speed):
 def get():
     errTextC = c_char_p()  # Текст ошибки. C type: char*
     # выполняем мерцание светодиодом,передаем дескриптор светодиода,3 параметра цвета(RGB),продолжительность,кол-во повторений и включаем асинхронный режим работы
-    errCode = lib.RI_SDK_exec_RGB_LED_FlashingWithFrequency(device["led"], 0, 0, 255, 500, 0, c_bool(True), errTextC)
+    errCode = lib.RI_SDK_exec_RGB_LED_FlashingWithFrequency(
+        device["led"], 0, 0, 255, 500, 0, c_bool(True), errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
     # выполняем поворот на заданный угол,передаем дескриптор стрелы,угол,скорость и асинхронный режим работы
-    errCode = lib.RI_SDK_exec_ServoDrive_Turn(device["arrowR"], arrowR_over_cube_position, speed, c_bool(False),
-                                              errTextC)
+    errCode = lib.RI_SDK_exec_ServoDrive_Turn(
+        device["arrowR"], arrowR_over_cube_position, speed, c_bool(False), errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
     # выполняем поворот на заданный угол,передаем дескриптор стрелы,угол,скорость и асинхронный режим работы
-    errCode = lib.RI_SDK_exec_ServoDrive_Turn(device["arrowL"], arrowL_over_cube_position, speed, c_bool(False),
-                                              errTextC)
+    errCode = lib.RI_SDK_exec_ServoDrive_Turn(
+        device["arrowL"], arrowL_over_cube_position, speed, c_bool(False), errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
     # выполняем поворот на заданный угол,передаем дескриптор клешни,угол,скорость и асинхронный режим работы
-    errCode = lib.RI_SDK_exec_ServoDrive_Turn(device["claw"], claw_unclenched_position, speed, c_bool(False), errTextC)
+    errCode = lib.RI_SDK_exec_ServoDrive_Turn(
+        device["claw"], claw_unclenched_position, speed, c_bool(False), errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
     # выполняем поворот на заданный угол,передаем дескриптор стрелы,угол,скорость и асинхронный режим работы
-    errCode = lib.RI_SDK_exec_ServoDrive_Turn(device["arrowR"], (arrowR_cube_position - arrowR_over_cube_position),
-                                              speed, c_bool(False), errTextC)
+    errCode = lib.RI_SDK_exec_ServoDrive_Turn(
+        device["arrowR"],
+        (arrowR_cube_position - arrowR_over_cube_position),
+        speed,
+        c_bool(False),
+        errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
     # выполняем поворот на заданный угол,передаем дескриптор стрелы,угол,скорость и асинхронный режим работы
-    errCode = lib.RI_SDK_exec_ServoDrive_Turn(device["arrowL"], (arrowL_cube_position - arrowL_over_cube_position),
-                                              speed, c_bool(False), errTextC)
+    errCode = lib.RI_SDK_exec_ServoDrive_Turn(
+        device["arrowL"],
+        (arrowL_cube_position - arrowL_over_cube_position),
+        speed,
+        c_bool(False),
+        errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
     # выполняем поворот на заданный угол,передаем дескриптор клешни,угол,скорость и асинхронный режим работы
-    errCode = lib.RI_SDK_exec_ServoDrive_Turn(device["claw"], (-1) * claw_unclenched_position, speed, c_bool(False),
-                                              errTextC)
+    errCode = lib.RI_SDK_exec_ServoDrive_Turn(
+        device["claw"], (-1) * claw_unclenched_position, speed, c_bool(False), errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
     # выполняем поворот на заданный угол,передаем дескриптор стрелы,угол,скорость и асинхронный режим работы
-    errCode = lib.RI_SDK_exec_ServoDrive_Turn(device["arrowR"], (-1) * arrowR_cube_position, speed, c_bool(False),
-                                              errTextC)
+    errCode = lib.RI_SDK_exec_ServoDrive_Turn(
+        device["arrowR"], (-1) * arrowR_cube_position, speed, c_bool(False), errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
     # выполняем поворот на заданный угол,передаем дескриптор стрелы,угол,скорость и асинхронный режим работы
-    errCode = lib.RI_SDK_exec_ServoDrive_Turn(device["arrowL"], (-1) * arrowL_cube_position, speed, c_bool(False),
-                                              errTextC)
+    errCode = lib.RI_SDK_exec_ServoDrive_Turn(
+        device["arrowL"], (-1) * arrowL_cube_position, speed, c_bool(False), errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
 
@@ -321,34 +422,45 @@ def get():
 def put():
     errTextC = c_char_p()  # Текст ошибки. C type: char*
     # выполняем мерцание светодиодом,передаем дескриптор светодиода,3 параметра цвета(RGB),продолжительность,кол-во повторений и включаем асинхронный режим работы
-    errCode = lib.RI_SDK_exec_RGB_LED_Flicker(device["led"], 0, 0, 255, 500, 0, c_bool(True), errTextC)
+    errCode = lib.RI_SDK_exec_RGB_LED_Flicker(
+        device["led"], 0, 0, 255, 500, 0, c_bool(True), errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
     # выполняем поворот на заданный угол,передаем дескриптор стрелы,угол,скорость и асинхронный режим работы
-    errCode = lib.RI_SDK_exec_ServoDrive_Turn(device["arrowR"], arrowR_cube_position, speed, c_bool(False), errTextC)
+    errCode = lib.RI_SDK_exec_ServoDrive_Turn(
+        device["arrowR"], arrowR_cube_position, speed, c_bool(False), errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
     # выполняем поворот на заданный угол,передаем дескриптор стрелы,угол,скорость и асинхронный режим работы
-    errCode = lib.RI_SDK_exec_ServoDrive_Turn(device["arrowL"], arrowL_cube_position, speed, c_bool(False), errTextC)
+    errCode = lib.RI_SDK_exec_ServoDrive_Turn(
+        device["arrowL"], arrowL_cube_position, speed, c_bool(False), errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
     # выполняем поворот на заданный угол,передаем дескриптор клешни,угол,скорость и асинхронный режим работы
-    errCode = lib.RI_SDK_exec_ServoDrive_Turn(device["claw"], claw_unclenched_position, speed, c_bool(False), errTextC)
+    errCode = lib.RI_SDK_exec_ServoDrive_Turn(
+        device["claw"], claw_unclenched_position, speed, c_bool(False), errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
     # выполняем поворот на заданный угол,передаем дескриптор стрелы,угол,скорость и асинхронный режим работы
-    errCode = lib.RI_SDK_exec_ServoDrive_Turn(device["arrowR"], (-1) * arrowR_cube_position, speed, c_bool(False),
-                                              errTextC)
+    errCode = lib.RI_SDK_exec_ServoDrive_Turn(
+        device["arrowR"], (-1) * arrowR_cube_position, speed, c_bool(False), errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
     # выполняем поворот на заданный угол,передаем дескриптор стрелы,угол,скорость и асинхронный режим работы
-    errCode = lib.RI_SDK_exec_ServoDrive_Turn(device["arrowL"], (-1) * arrowL_cube_position, speed, c_bool(False),
-                                              errTextC)
+    errCode = lib.RI_SDK_exec_ServoDrive_Turn(
+        device["arrowL"], (-1) * arrowL_cube_position, speed, c_bool(False), errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
     # выполняем поворот на заданный угол,передаем дескриптор клешни,угол,скорость и асинхронный режим работы
-    errCode = lib.RI_SDK_exec_ServoDrive_Turn(device["claw"], (-1) * claw_unclenched_position, speed, c_bool(False),
-                                              errTextC)
+    errCode = lib.RI_SDK_exec_ServoDrive_Turn(
+        device["claw"], (-1) * claw_unclenched_position, speed, c_bool(False), errTextC,
+    )
     if errCode != 0:
         return errCode, errTextC
 
@@ -410,4 +522,3 @@ def main():
 
 
 main()
-
