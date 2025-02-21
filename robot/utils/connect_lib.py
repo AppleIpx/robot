@@ -1,4 +1,4 @@
-from ctypes import cdll, CDLL
+from ctypes import CDLL, cdll
 
 
 def connect_lib() -> CDLL:

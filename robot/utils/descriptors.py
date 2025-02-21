@@ -14,22 +14,27 @@ def init_descriptors():
     }
 
 
-def set_up_descriptor(default_params: dict[str: int]):
+def set_up_descriptor(default_params: dict[str:int]):
     device = init_descriptors()
     return [
-        {"descriptor": device["body"],
-         "start_position": default_params.get("body_start_pulse")
-         },
-        {"descriptor": device["claw"],
-         "start_position": default_params.get("claw_start_pulse")
-         },
-        {"descriptor": device["arrowR"],
-         "start_position": default_params.get("arrowR_start_pulse")
-         },
-        {"descriptor": device["arrowL"],
-         "start_position": default_params.get("arrowL_start_pulse")
-         },
-        {"descriptor": device["clawRotate"],
-         "start_position": default_params.get("claw_rotate_start_pulse")
-         },
+        {
+            "descriptor": device["body"],
+            "start_position": default_params.get("body_start_pulse"),
+        },
+        {
+            "descriptor": device["claw"],
+            "start_position": default_params.get("claw_start_pulse"),
+        },
+        {
+            "descriptor": device["arrowR"],
+            "start_position": default_params.get("arrowR_start_pulse"),
+        },
+        {
+            "descriptor": device["arrowL"],
+            "start_position": default_params.get("arrowL_start_pulse"),
+        },
+        {
+            "descriptor": device["clawRotate"],
+            "start_position": default_params.get("claw_rotate_start_pulse"),
+        },
     ]
