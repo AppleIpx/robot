@@ -1,7 +1,8 @@
 from ctypes import c_int
 
 
-def init_descriptors():
+def init_descriptors() -> dict:
+    """Инициализация дескрипторов."""
     return {
         "i2c": c_int(),  # дескриптор i2c
         "pwm": c_int(),  # дескриптор pwm
@@ -14,8 +15,8 @@ def init_descriptors():
     }
 
 
-def set_up_descriptor(default_params: dict[str:int]):
-    device = init_descriptors()
+def set_up_descriptor(default_params: dict[str:int], device: dict) -> list[dict]:
+    """Установка дескрипторов."""
     return [
         {
             "descriptor": device["body"],

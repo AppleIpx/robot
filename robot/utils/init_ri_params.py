@@ -3,7 +3,7 @@ from ctypes import CDLL, c_bool, c_char_p, c_int, c_uint8
 
 
 def ri_params(lib: CDLL) -> None:
-    # Указываем типы аргументов для функций
+    """Indicate the types of arguments for functions."""
     lib.RI_SDK_InitSDK.argtypes = [c_int, POINTER(c_char_p)]
     lib.RI_SDK_CreateModelComponent.argtypes = [
         c_char_p,

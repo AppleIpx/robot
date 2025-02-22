@@ -77,6 +77,7 @@ lint.ignore = [
     "PLR0913", # Too many arguments for function call
     "D106",    # Missing docstring in public nested class
     "RUF001",  # String contains ambiguous
+    "RUF002",  # String contains ambiguous
 ]
 exclude = [
     ".venv/"
